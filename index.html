@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lane's Project Hub</title>
+<meta name="description" content="One page linking to all of Lane Haden's projects: Bible study sites, Hebrew reading, Wisdom, and hardware builds.">
+<style>
+:root {
+  --bg: #f6f5f1; --card: #ffffff; --ink: #1d1f23; --muted: #62666d;
+  --line: #deddd6; --accent: #2f5d8a; --accent-ink: #ffffff; --chip: #ecebe4;
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14161a; --card: #1c1f25; --ink: #e9eaec; --muted: #9aa0a9;
+    --line: #2b2f37; --accent: #6fa3d6; --accent-ink: #0e1116; --chip: #262a32;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14161a; --card: #1c1f25; --ink: #e9eaec; --muted: #9aa0a9;
+  --line: #2b2f37; --accent: #6fa3d6; --accent-ink: #0e1116; --chip: #262a32;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 56px; }
+header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+h1 { margin: 0 0 4px; font-size: 1.8rem; letter-spacing: -.01em; }
+.sub { margin: 0; color: var(--muted); }
+#theme { background: var(--card); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; align-items: center; }
+#q { flex: 1 1 200px; min-width: 0; padding: 9px 12px; border-radius: 8px; font: inherit;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button { border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: .9rem; }
+.filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+  margin: 28px 0 10px; font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
+.card h3 { margin: 0; font-size: 1.1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .93rem; flex: 1; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { background: var(--chip); border-radius: 6px; padding: 2px 8px; font-size: .75rem; color: var(--muted); }
+.tag.local { color: var(--ink); }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.btn { text-decoration: none; padding: 7px 12px; border-radius: 8px; font-size: .9rem; font-weight: 500;
+  border: 1px solid var(--line); color: var(--ink); background: transparent; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:hover, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.empty { color: var(--muted); padding: 24px 0; }
+footer { margin-top: 40px; color: var(--muted); font-size: .85rem; }
+footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Lane's Project Hub</h1>
+      <p class="sub">Everything I'm building, in one place.</p>
+    </div>
+    <button id="theme" type="button" aria-label="Toggle light or dark theme">Theme</button>
+  </header>
+
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search projects" aria-label="Search projects">
+    <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
+  </div>
+
+  <main id="main"></main>
+
+  <footer>
+    Edit <code>projects.js</code> to add or change a card.
+    <a href="https://github.com/lanehaden157">GitHub profile</a>
+  </footer>
+</div>
+
+<script src="projects.js"></script>
+<script>
+(function () {
+  var main = document.getElementById('main');
+  var filtersEl = document.getElementById('filters');
+  var qEl = document.getElementById('q');
+  var active = 'All';
+
+  var cats = ['All'];
+  PROJECTS.forEach(function (p) { if (cats.indexOf(p.group) < 0) cats.push(p.group); });
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function renderFilters() {
+    filtersEl.innerHTML = '';
+    cats.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = c;
+      b.setAttribute('aria-pressed', c === active ? 'true' : 'false');
+      b.onclick = function () { active = c; renderFilters(); render(); };
+      filtersEl.appendChild(b);
+    });
+  }
+
+  function card(p) {
+    var tags = (p.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('');
+    if (!p.site) tags += '<span class="tag local">local only</span>';
+    var btns = '';
+    if (p.site) btns += '<a class="btn primary" href="' + esc(p.site) + '">Open site</a>';
+    if (p.repo) btns += '<a class="btn" href="' + esc(p.repo) + '">GitHub</a>';
+    (p.links || []).forEach(function (l) {
+      btns += '<a class="btn" href="' + esc(l.url) + '">' + esc(l.label) + '</a>';
+    });
+    return '<article class="card"><h3>' + esc(p.name) + '</h3><p>' + esc(p.blurb) + '</p>' +
+      '<div class="tags">' + tags + '</div><div class="btns">' + btns + '</div></article>';
+  }
+
+  function render() {
+    var q = qEl.value.trim().toLowerCase();
+    var shown = PROJECTS.filter(function (p) {
+      if (active !== 'All' && p.group !== active) return false;
+      if (!q) return true;
+      return (p.name + ' ' + p.blurb + ' ' + (p.tags || []).join(' ')).toLowerCase().indexOf(q) >= 0;
+    });
+    if (!shown.length) { main.innerHTML = '<p class="empty">No projects match.</p>'; return; }
+    var html = '';
+    cats.slice(1).forEach(function (g) {
+      var items = shown.filter(function (p) { return p.group === g; });
+      if (items.length) html += '<h2>' + esc(g) + '</h2><div class="grid">' + items.map(card).join('') + '</div>';
+    });
+    main.innerHTML = html;
+  }
+
+  qEl.addEventListener('input', render);
+
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('hub-theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme').onclick = function () {
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('hub-theme', next); } catch (e) {}
+  };
+
+  renderFilters(); render();
+})();
+</script>
+</body>
+</html>
